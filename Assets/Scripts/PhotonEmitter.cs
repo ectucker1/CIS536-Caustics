@@ -41,17 +41,63 @@ public class PhotonEmitter : MonoBehaviour
     }
 
     // Emit the given photon
-    private void EmitPhoton(Photon photon, int bounces = 5)
+    private void EmitPhoton(Photon photon, int bounces = 3, float lastIOR = 1.0f, bool reverse = false)
     {
         // If there are no bounces remaining, return
         if (bounces < 0)
             return;
 
         // Check ray against scene
+        Ray ray = new Ray(photon.Position, photon.IncidentDirection);
+
         RaycastHit hit;
-        if (Physics.Raycast(photon.Position, photon.IncidentDirection, out hit))
+        RaycastHit? maybe = null;
+        bool hasCollision = false;
+
+        float distance = 0.0f;
+        Vector3 normal = Vector3.zero;
+
+        if (!reverse)
         {
-            Debug.DrawRay(photon.Position, photon.IncidentDirection * hit.distance, Color.green);
+            hasCollision = Physics.Raycast(ray.origin, ray.direction, out hit);
+            maybe = hit;
+            distance = hit.distance;
+            normal = hit.normal;
+        }
+        else if (reverse)
+        {
+            ray.origin = ray.GetPoint(100.0f);
+            ray.direction = -ray.direction;
+
+            RaycastHit[] results = Physics.RaycastAll(ray);
+            RaycastHit? min = null;
+            float minDist = 0.0f;
+            foreach (RaycastHit result in results)
+            {
+                if (result.distance > minDist && result.distance < 100.0f)
+                {
+                    min = result;
+                    minDist = result.distance;
+                }
+            }
+
+            if (min != null)
+            {
+                hasCollision = true;
+                maybe = min;
+                hit = (RaycastHit)maybe;
+                distance = 100.0f - hit.distance;
+                normal = -hit.normal;
+            }
+        }
+
+        if (hasCollision)
+        {
+            hit = (RaycastHit)maybe;
+
+            Debug.DrawRay(photon.Position, photon.IncidentDirection * distance, Color.green);
+            if (reverse)
+                photon.IncidentDirection = -photon.IncidentDirection;
 
             photon.Position = hit.point;
 
@@ -62,31 +108,58 @@ public class PhotonEmitter : MonoBehaviour
             float probReflection = ProbReflection(material);
             float probDiffuse = ProbDiffuseReflection(material);
             float probSpecular = ProbSpecularReflection(material);
+            float probTransmission = ProbTransmission(material);
 
             Color materialColor = GetColor(material);
 
             // Perform Russian Roulette to determine how photon bounces
-            float choice = Random.Range(0.0f, 1.0f);
-            // Diffuse bounce
-            if (choice < probDiffuse)
+            float choice1 = Random.Range(0.0f, 1.0f);
+            float choice2 = Random.Range(0.0f, 1.0f);
+
+            // TODO Validate correct handling of transmission
+            // Refraction
+            if (choice1 < probTransmission)
             {
-                photon.Power = (photon.Power * materialColor) / probDiffuse;
-                photon.IncidentDirection = Random.onUnitSphere;
-                if (Vector3.Dot(photon.IncidentDirection, hit.normal) < 0)
-                    photon.IncidentDirection = -photon.IncidentDirection;
-                EmitPhoton(photon, bounces - 1);
+                // Inset position into the surface somewhat
+                photon.Position -= hit.normal * 0.01f;
+                // See https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics/refraction for math
+                float ior = GetRefractiveIndex(material);
+                float etai_over_etat = lastIOR / ior;
+                // Assume we're leaving surface if ior is equal to the last
+                if (reverse) {
+                    etai_over_etat = ior / lastIOR;
+                }
+                float cos_theta = Mathf.Min(Vector3.Dot(-photon.IncidentDirection, normal), 1.0f);
+                Vector3 r_out_perp = etai_over_etat * (photon.IncidentDirection + cos_theta * normal);
+                Vector3 r_out_parallel = -Mathf.Sqrt(Mathf.Abs(1.0f - r_out_perp.sqrMagnitude)) * normal;
+                photon.IncidentDirection = r_out_perp + r_out_parallel;
+                photon.Power = (photon.Power * materialColor) / probTransmission;
+                EmitPhoton(photon, bounces - 1, ior, !reverse);
             }
-            // Specular bounce
-            else if (choice < probReflection)
-            {
-                photon.Power = (photon.Power * materialColor) / probSpecular;
-                photon.IncidentDirection = Vector3.Reflect(photon.IncidentDirection, hit.normal);
-                EmitPhoton(photon, bounces - 1);
-            }
-            // Absorption
+            // Reflection or absorbtion
             else
             {
-                _map.AddPhoton(photon);
+                // Diffuse bounce
+                if (choice2 < probDiffuse)
+                {
+                    photon.Power = (photon.Power * materialColor) / probDiffuse;
+                    photon.IncidentDirection = Random.onUnitSphere;
+                    if (Vector3.Dot(photon.IncidentDirection, normal) < 0)
+                        photon.IncidentDirection = -photon.IncidentDirection;
+                    EmitPhoton(photon, bounces - 1);
+                }
+                // Specular bounce
+                else if (choice2 < probReflection)
+                {
+                    photon.Power = (photon.Power * materialColor) / probSpecular;
+                    photon.IncidentDirection = Vector3.Reflect(photon.IncidentDirection, normal);
+                    EmitPhoton(photon, bounces - 1);
+                }
+                // Absorption
+                else
+                {
+                    _map.AddPhoton(photon);
+                }
             }
         }
         else
@@ -130,9 +203,20 @@ public class PhotonEmitter : MonoBehaviour
         return ProbReflection(material) - ProbDiffuseReflection(material);
     }
 
+    private float ProbTransmission(Material material)
+    {
+        return 1.0f - GetColor(material).a;
+    }
+
+    private float GetRefractiveIndex(Material material)
+    {
+        // TODO Get IOR from material
+        return 1.5f;
+    }
+
     private Color GetColor(Material material)
     {
         // TODO Get color from material
-        return Color.white;
+        return new Color(1.0f, 1.0f, 1.0f, 0.5f);
     }
 }
