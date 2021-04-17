@@ -187,20 +187,17 @@ public class PhotonEmitter : MonoBehaviour
 
     private float ProbReflection(Material material)
     {
-        // TODO Calculate reflection proability from PBR material properties
-        return 0.6f;
+        return ProbDiffuseReflection(material) + ProbSpecularReflection(material);
     }
 
     private float ProbDiffuseReflection(Material material)
     {
-        // TODO Calculate reflection proability from PBR material properties
-        return 0.3f;
+        return material.GetFloat("_Diffuse");
     }
 
     private float ProbSpecularReflection(Material material)
     {
-        // TODO Calculate reflection proability from PBR material properties
-        return ProbReflection(material) - ProbDiffuseReflection(material);
+        return material.GetFloat("_Specular");
     }
 
     private float ProbTransmission(Material material)
@@ -210,13 +207,11 @@ public class PhotonEmitter : MonoBehaviour
 
     private float GetRefractiveIndex(Material material)
     {
-        // TODO Get IOR from material
-        return 1.5f;
+        return material.GetFloat("_IOR");
     }
 
     private Color GetColor(Material material)
     {
-        // TODO Get color from material
-        return new Color(1.0f, 1.0f, 1.0f, 0.5f);
+        return material.GetColor("_Color");
     }
 }
