@@ -11,7 +11,8 @@ public class RadianceTexture : MonoBehaviour
     private AbstractUVWorld _UVWorld;
     private PhotonMap _map;
 
-    private bool _textureBuilt = false;
+    private int _currentU = 0;
+    private Texture2D _texture;
 
     void Start()
     {
@@ -21,43 +22,41 @@ public class RadianceTexture : MonoBehaviour
 
     void Update()
     {
-        if (_map.TreeBuilt && !_textureBuilt)
+        if (_map.TreeBuilt && _currentU < TextureSize)
         {
             // Create a new texture of the set size
-            var texture = new Texture2D(TextureSize, TextureSize, TextureFormat.ARGB32, false);
+            if (_currentU == 0)
+                _texture = new Texture2D(TextureSize, TextureSize, TextureFormat.ARGB32, false);
 
-            // For each pixel in the texture
-            for (int u = 0; u < TextureSize; u++)
+            // For each pixel in the current row of the texture
+            for (int v = 0; v < TextureSize; v++)
             {
-                for (int v = 0; v < TextureSize; v++)
+                // Get the UV coordinates
+                Vector2 uv = new Vector2((float)_currentU / TextureSize, (float)v / TextureSize);
+
+                // Get the global position and normal
+                Vector3 position;
+                Vector3 normal;
+                bool onSurface = _UVWorld.World(uv, out position, out normal);
+
+                // If the position is actually on the surface
+                if (onSurface)
                 {
-                    // Get the UV coordinates
-                    Vector2 uv = new Vector2((float)u / TextureSize, (float)v / TextureSize);
-
-                    // Get the global position and normal
-                    Vector3 position;
-                    Vector3 normal;
-                    bool onSurface = _UVWorld.World(uv, out position, out normal);
-
-                    // If the position is actually on the surface
-                    if (onSurface)
-                    {
-                        // Set that point to the radiance estimate
-                        Color radiance = _map.EstimateRadiance(position);
-                        texture.SetPixel(u, v, radiance);
-                    }
+                    // Set that point to the radiance estimate
+                    Color radiance = _map.EstimateRadiance(position);
+                    _texture.SetPixel(_currentU, v, radiance);
                 }
             }
 
+            _currentU++;
+
             // Apply changes to texture
-            texture.Apply();
+            _texture.Apply();
             
             // Apply texture as material
             Material unlit = new Material(Shader.Find("Mobile/Unlit (Supports Lightmap)"));
-            unlit.mainTexture = texture;
+            unlit.mainTexture = _texture;
             GetComponent<Renderer>().material = unlit;
-
-            _textureBuilt = true;
         }
     }
 }

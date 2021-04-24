@@ -21,6 +21,14 @@ public class PhotonEmitter : MonoBehaviour
         _map = PhotonMap.GetComponent<PhotonMap>();
     }
 
+    void OnGUI()
+    {
+        if (_numEmitted < MAX_EMITTED)
+        {
+            GUI.Label(new Rect(0, 0, 500, 50), $"Emitting photons {_numEmitted}/{MAX_EMITTED}");
+        }
+    }
+
     // Emit more photons each frame
     void Update()
     {
