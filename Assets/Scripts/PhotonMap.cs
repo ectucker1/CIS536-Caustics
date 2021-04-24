@@ -73,7 +73,7 @@ public class PhotonMap : MonoBehaviour
             totalPower += p.Power;
         }
 
-        return totalPower / (Mathf.PI * maxRadiusSquared);
+        return totalPower / (Mathf.PI * maxRadiusSquared) / nearest.Count;
     }
 
     public void BuildTree()
