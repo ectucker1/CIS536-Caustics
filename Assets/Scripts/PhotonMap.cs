@@ -40,12 +40,40 @@ public class PhotonMap : MonoBehaviour
             {
                 Gizmos.DrawSphere(_mapping[index].Position, 0.01f);
             }
+
+            // Visualize radiance estimate
+            Gizmos.color = EstimateRadiance(Vector3.zero);
+            Gizmos.DrawSphere(Vector3.zero, 0.05f);
         }
     }
 
     public void AddPhoton(Photon photon)
     {
         _photons.Add(photon);
+    }
+
+    public Color EstimateRadiance(Vector3 point)
+    {
+        // Find the nearest 100 photons
+        List<int> nearest = new List<int>();
+        _query.KNearest(_tree, point, 100, nearest);
+
+        float maxRadiusSquared = 0;
+        Color totalPower = Color.black;
+
+        foreach (int index in nearest)
+        {
+            Photon p = _mapping[index];
+            var distSq = (p.Position - point).sqrMagnitude;
+            if (distSq > maxRadiusSquared)
+            {
+                maxRadiusSquared = distSq;
+            }
+            // TODO account for incident angle
+            totalPower += p.Power;
+        }
+
+        return totalPower / (Mathf.PI * maxRadiusSquared);
     }
 
     public void BuildTree()
