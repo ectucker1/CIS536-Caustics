@@ -38,6 +38,10 @@ public class PhotonEmitter : MonoBehaviour
                 _numEmitted++;
             }
         }
+        else if (!_map.TreeBuilt)
+        {
+            _map.BuildTree();
+        }
     }
 
     // Emit the given photon
