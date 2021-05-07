@@ -145,7 +145,7 @@ public class PhotonEmitter : MonoBehaviour
                 Vector3 r_out_perp = etai_over_etat * (photon.IncidentDirection + cos_theta * normal);
                 Vector3 r_out_parallel = -Mathf.Sqrt(Mathf.Abs(1.0f - r_out_perp.sqrMagnitude)) * normal;
                 photon.IncidentDirection = r_out_perp + r_out_parallel;
-                photon.Power = (photon.Power * materialColor) / probTransmission;
+                photon.Power = (photon.Power * materialColor);
                 EmitPhoton(photon, bounces - 1, ior, !reverse);
             }
             // Reflection or absorbtion
@@ -154,7 +154,7 @@ public class PhotonEmitter : MonoBehaviour
                 // Diffuse bounce
                 if (choice2 < probDiffuse)
                 {
-                    photon.Power = (photon.Power * materialColor) / probDiffuse;
+                    photon.Power = (photon.Power * materialColor);
                     photon.IncidentDirection = Random.onUnitSphere;
                     if (Vector3.Dot(photon.IncidentDirection, normal) < 0)
                         photon.IncidentDirection = -photon.IncidentDirection;
@@ -163,7 +163,7 @@ public class PhotonEmitter : MonoBehaviour
                 // Specular bounce
                 else if (choice2 < probReflection)
                 {
-                    photon.Power = (photon.Power * materialColor) / probSpecular;
+                    photon.Power = (photon.Power * materialColor);
                     photon.IncidentDirection = Vector3.Reflect(photon.IncidentDirection, normal);
                     EmitPhoton(photon, bounces - 1);
                 }

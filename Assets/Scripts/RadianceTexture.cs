@@ -24,9 +24,18 @@ public class RadianceTexture : MonoBehaviour
     {
         if (_map.TreeBuilt && _currentU < TextureSize)
         {
-            // Create a new texture of the set size
+            // If this is our first frame
             if (_currentU == 0)
+            {
+                // Create a new texture of the set size
                 _texture = new Texture2D(TextureSize, TextureSize, TextureFormat.ARGB32, false);
+                // Create new material copying the old properties
+                var renderer = GetComponent<Renderer>();
+                Material blended = new Material(Shader.Find("Custom/BlendingShader"));
+                blended.SetTexture("_PhotonMap", _texture);
+                blended.color = renderer.material.color;
+                renderer.material = blended;
+            }
 
             // For each pixel in the current row of the texture
             for (int v = 0; v < TextureSize; v++)
@@ -43,7 +52,7 @@ public class RadianceTexture : MonoBehaviour
                 if (onSurface)
                 {
                     // Set that point to the radiance estimate
-                    Color radiance = _map.EstimateRadiance(position);
+                    Color radiance = _map.EstimateRadiance(position, normal);
                     _texture.SetPixel(_currentU, v, radiance);
                 }
             }
@@ -52,11 +61,6 @@ public class RadianceTexture : MonoBehaviour
 
             // Apply changes to texture
             _texture.Apply();
-            
-            // Apply texture as material
-            Material unlit = new Material(Shader.Find("Mobile/Unlit (Supports Lightmap)"));
-            unlit.mainTexture = _texture;
-            GetComponent<Renderer>().material = unlit;
         }
     }
 }

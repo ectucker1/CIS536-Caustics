@@ -42,7 +42,7 @@ public class PhotonMap : MonoBehaviour
             }
 
             // Visualize radiance estimate
-            Gizmos.color = EstimateRadiance(Vector3.zero);
+            Gizmos.color = EstimateRadiance(Vector3.zero, Vector3.up);
             Gizmos.DrawSphere(Vector3.zero, 0.05f);
         }
     }
@@ -52,7 +52,7 @@ public class PhotonMap : MonoBehaviour
         _photons.Add(photon);
     }
 
-    public Color EstimateRadiance(Vector3 point)
+    public Color EstimateRadiance(Vector3 point, Vector3 normal)
     {
         // Find the nearest 100 photons
         List<int> nearest = new List<int>();
