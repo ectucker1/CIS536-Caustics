@@ -129,6 +129,7 @@ public class PhotonEmitter : MonoBehaviour
             // Refraction
             if (choice1 < probTransmission)
             {
+                hasRefracted = true;
                 // Inset position into the surface somewhat
                 photon.Position -= hit.normal * 0.01f;
                 // See https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics/refraction for math
@@ -137,7 +138,6 @@ public class PhotonEmitter : MonoBehaviour
                 // Assume we're leaving surface if ior is equal to the last
                 if (reverse) {
                     etai_over_etat = ior / lastIOR;
-                    hasRefracted = true;
                 }
                 float cos_theta = Mathf.Min(Vector3.Dot(-photon.IncidentDirection, normal), 1.0f);
                 Vector3 r_out_perp = etai_over_etat * (photon.IncidentDirection + cos_theta * normal);
