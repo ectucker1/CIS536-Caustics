@@ -29,6 +29,15 @@ public class RadianceTexture : MonoBehaviour
             {
                 // Create a new texture of the set size
                 _texture = new Texture2D(TextureSize, TextureSize, TextureFormat.ARGB32, false);
+                for (int y = 0; y < _texture.height; y++)
+                {
+                    for (int x = 0; x < _texture.width; x++)
+                    {
+
+                        _texture.SetPixel(x, y, Color.black);
+                    }
+                }
+
                 // Create new material copying the old properties
                 var renderer = GetComponent<Renderer>();
                 Material blended = new Material(Shader.Find("Custom/BlendingShader"));

@@ -27,6 +27,7 @@
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv2_PhotonMap;
         };
 
         half _Glossiness;
@@ -46,7 +47,7 @@
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
             // Radiance from photon map
-            fixed4 rad = tex2D(_PhotonMap, IN.uv_MainTex) * _RadianceAmount;
+            fixed4 rad = tex2D(_PhotonMap, IN.uv2_PhotonMap) * _RadianceAmount;
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;

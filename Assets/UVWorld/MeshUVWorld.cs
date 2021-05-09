@@ -21,7 +21,7 @@ namespace UVWorld {
     		_triangles = _mesh.triangles;
     		_vertices = _mesh.vertices;
     		_normals = _mesh.normals;
-    		_uvs = _mesh.uv;
+    		_uvs = _mesh.uv2;
 
     		var triangleCount = _triangles.Length / 3;
     		_uvTris = new Triangle2D[triangleCount];
