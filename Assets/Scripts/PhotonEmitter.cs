@@ -52,7 +52,7 @@ public class PhotonEmitter : MonoBehaviour
     }
 
     // Emit the given photon
-    private void EmitPhoton(Photon photon, int bounces = 3, float lastIOR = 1.0f, bool reverse = false, bool hasRefracted = false)
+    private void EmitPhoton(Photon photon, int bounces = 3, float lastIOR = 1.0f, bool reverse = false, bool isCaustic = false)
     {
         // If there are no bounces remaining, return
         if (bounces < 0)
@@ -129,7 +129,7 @@ public class PhotonEmitter : MonoBehaviour
             // Refraction
             if (choice1 < probTransmission)
             {
-                hasRefracted = true;
+                isCaustic = true;
                 // Inset position into the surface somewhat
                 photon.Position -= hit.normal * 0.01f;
                 // See https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics/refraction for math
@@ -144,7 +144,7 @@ public class PhotonEmitter : MonoBehaviour
                 Vector3 r_out_parallel = -Mathf.Sqrt(Mathf.Abs(1.0f - r_out_perp.sqrMagnitude)) * normal;
                 photon.IncidentDirection = r_out_perp + r_out_parallel;
                 photon.Power = (photon.Power * materialColor);
-                EmitPhoton(photon, bounces - 1, ior, !reverse, hasRefracted: hasRefracted);
+                EmitPhoton(photon, bounces - 1, ior, !reverse, isCaustic: isCaustic);
             }
             // Reflection or absorbtion
             else
@@ -156,19 +156,20 @@ public class PhotonEmitter : MonoBehaviour
                     photon.IncidentDirection = Random.onUnitSphere;
                     if (Vector3.Dot(photon.IncidentDirection, normal) < 0)
                         photon.IncidentDirection = -photon.IncidentDirection;
-                    EmitPhoton(photon, bounces - 1, hasRefracted: hasRefracted);
+                    EmitPhoton(photon, bounces - 1, isCaustic: isCaustic);
                 }
                 // Specular bounce
                 else if (choice2 < probReflection)
                 {
+                    isCaustic = true;
                     photon.Power = (photon.Power * materialColor);
                     photon.IncidentDirection = Vector3.Reflect(photon.IncidentDirection, normal);
-                    EmitPhoton(photon, bounces - 1, hasRefracted: hasRefracted);
+                    EmitPhoton(photon, bounces - 1, isCaustic: isCaustic);
                 }
                 // Absorption
                 else
                 {
-                    if (hasRefracted)
+                    if (isCaustic)
                     {
                         _map.AddPhoton(photon);
                     }
