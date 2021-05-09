@@ -108,8 +108,6 @@ public class PhotonEmitter : MonoBehaviour
             hit = (RaycastHit)maybe;
 
             Debug.DrawRay(photon.Position, photon.IncidentDirection * distance, Color.green);
-            if (reverse)
-                photon.IncidentDirection = -photon.IncidentDirection;
 
             photon.Position = hit.point;
 
