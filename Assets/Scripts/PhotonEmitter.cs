@@ -5,8 +5,7 @@ using UnityEngine;
 // Script to attach to lights so they emit photons
 public class PhotonEmitter : MonoBehaviour
 {
-    const int MAX_EMITTED = 100000;
-
+    public int MaxEmitted = 100000;
     private Light _light;
 
     public GameObject PhotonMap;
@@ -23,16 +22,16 @@ public class PhotonEmitter : MonoBehaviour
 
     void OnGUI()
     {
-        if (_numEmitted < MAX_EMITTED)
+        if (_numEmitted < MaxEmitted)
         {
-            GUI.Label(new Rect(0, 0, 500, 50), $"Emitting photons {_numEmitted}/{MAX_EMITTED}");
+            GUI.Label(new Rect(0, 0, 500, 50), $"Emitting photons {_numEmitted}/{MaxEmitted}");
         }
     }
 
     // Emit more photons each frame
     void Update()
     {
-        if (_map != null && _light != null && _numEmitted < MAX_EMITTED)
+        if (_map != null && _light != null && _numEmitted < MaxEmitted)
         {
             for (int i = 0; i < 100; i++)
             {
@@ -53,7 +52,7 @@ public class PhotonEmitter : MonoBehaviour
     }
 
     // Emit the given photon
-    private void EmitPhoton(Photon photon, int bounces = 3, float lastIOR = 1.0f, bool reverse = false)
+    private void EmitPhoton(Photon photon, int bounces = 3, float lastIOR = 1.0f, bool reverse = false, bool hasRefracted = false)
     {
         // If there are no bounces remaining, return
         if (bounces < 0)
@@ -138,13 +137,14 @@ public class PhotonEmitter : MonoBehaviour
                 // Assume we're leaving surface if ior is equal to the last
                 if (reverse) {
                     etai_over_etat = ior / lastIOR;
+                    hasRefracted = true;
                 }
                 float cos_theta = Mathf.Min(Vector3.Dot(-photon.IncidentDirection, normal), 1.0f);
                 Vector3 r_out_perp = etai_over_etat * (photon.IncidentDirection + cos_theta * normal);
                 Vector3 r_out_parallel = -Mathf.Sqrt(Mathf.Abs(1.0f - r_out_perp.sqrMagnitude)) * normal;
                 photon.IncidentDirection = r_out_perp + r_out_parallel;
                 photon.Power = (photon.Power * materialColor);
-                EmitPhoton(photon, bounces - 1, ior, !reverse);
+                EmitPhoton(photon, bounces - 1, ior, !reverse, hasRefracted: hasRefracted);
             }
             // Reflection or absorbtion
             else
@@ -156,19 +156,22 @@ public class PhotonEmitter : MonoBehaviour
                     photon.IncidentDirection = Random.onUnitSphere;
                     if (Vector3.Dot(photon.IncidentDirection, normal) < 0)
                         photon.IncidentDirection = -photon.IncidentDirection;
-                    EmitPhoton(photon, bounces - 1);
+                    EmitPhoton(photon, bounces - 1, hasRefracted: hasRefracted);
                 }
                 // Specular bounce
                 else if (choice2 < probReflection)
                 {
                     photon.Power = (photon.Power * materialColor);
                     photon.IncidentDirection = Vector3.Reflect(photon.IncidentDirection, normal);
-                    EmitPhoton(photon, bounces - 1);
+                    EmitPhoton(photon, bounces - 1, hasRefracted: hasRefracted);
                 }
                 // Absorption
                 else
                 {
-                    _map.AddPhoton(photon);
+                    if (hasRefracted)
+                    {
+                        _map.AddPhoton(photon);
+                    }
                 }
             }
         }

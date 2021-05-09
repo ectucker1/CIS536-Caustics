@@ -1125,6 +1125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb46737ea42c03a4d9e1ebfb2bd2e842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MaxEmitted: 5000
   PhotonMap: {fileID: 976306726}
 --- !u!1 &2079690718
 GameObject:

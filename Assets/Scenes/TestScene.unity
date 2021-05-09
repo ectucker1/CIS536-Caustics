@@ -226,6 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb46737ea42c03a4d9e1ebfb2bd2e842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MaxEmitted: 50000
   PhotonMap: {fileID: 1753891151}
 --- !u!1 &296366174
 GameObject:
@@ -385,7 +386,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 1753891151}
-  TextureSize: 256
+  TextureSize: 1024
 --- !u!65 &871151703
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -624,7 +625,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 1753891151}
-  TextureSize: 256
+  TextureSize: 512
 --- !u!114 &2025289977
 MonoBehaviour:
   m_ObjectHideFlags: 0
