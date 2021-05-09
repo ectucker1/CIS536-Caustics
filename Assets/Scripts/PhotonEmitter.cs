@@ -39,7 +39,7 @@ public class PhotonEmitter : MonoBehaviour
                 Photon photon;
                 photon.Position = transform.position;
                 photon.IncidentDirection = GetPhotonDirection();
-                photon.Power = _light.intensity * _light.color;
+                photon.Power = _light.intensity * _light.color / MaxEmitted;
 
                 EmitPhoton(photon);
                 _numEmitted++;

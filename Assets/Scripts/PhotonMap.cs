@@ -58,7 +58,7 @@ public class PhotonMap : MonoBehaviour
     {
         // Find the nearest 100 photons
         List<int> nearest = new List<int>();
-        _query.KNearest(_tree, point, 100, nearest);
+        _query.KNearest(_tree, point, 10, nearest);
 
         // Find furthest photon in radius
         float maxRadius = 0;
@@ -89,7 +89,7 @@ public class PhotonMap : MonoBehaviour
         // Divide by filter distribution
         totalPower /= 1.0f - 2.0f / (3.0f * FilterConstant);
 
-        return totalPower / nearest.Count;
+        return totalPower * 1000f;
     }
 
     public void BuildTree()
