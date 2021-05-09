@@ -16,6 +16,8 @@ public class PhotonMap : MonoBehaviour
 
     public bool TreeBuilt { get; private set; } = false;
 
+    public float FilterConstant = 1.0f;
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.white;
@@ -58,22 +60,36 @@ public class PhotonMap : MonoBehaviour
         List<int> nearest = new List<int>();
         _query.KNearest(_tree, point, 100, nearest);
 
-        float maxRadiusSquared = 0;
-        Color totalPower = Color.black;
-
+        // Find furthest photon in radius
+        float maxRadius = 0;
         foreach (int index in nearest)
         {
             Photon p = _mapping[index];
-            var distSq = (p.Position - point).sqrMagnitude;
-            if (distSq > maxRadiusSquared)
+            var dist = (p.Position - point).magnitude;
+            if (dist > maxRadius)
             {
-                maxRadiusSquared = distSq;
+                maxRadius = dist;
             }
-            // TODO account for incident angle
-            totalPower += p.Power;
         }
 
-        return totalPower / (Mathf.PI * maxRadiusSquared) / nearest.Count;
+        // Calculate power
+        Color totalPower = Color.black;
+        foreach (int index in nearest)
+        {
+            Photon p = _mapping[index];
+            var dist = (p.Position - point).magnitude;
+            // Cone filter weight
+            // See "A Practical Guide to Global Illumination using Photon Maps"
+            var weight = 1.0f - dist / (FilterConstant * maxRadius);
+            totalPower += p.Power * weight;
+        }
+
+        // Divide by sphere area
+        totalPower /= (Mathf.PI * maxRadius * maxRadius);
+        // Divide by filter distribution
+        totalPower /= 1.0f - 2.0f / (3.0f * FilterConstant);
+
+        return totalPower / nearest.Count;
     }
 
     public void BuildTree()
