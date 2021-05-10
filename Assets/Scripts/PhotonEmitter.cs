@@ -8,6 +8,8 @@ public class PhotonEmitter : MonoBehaviour
     public int MaxEmitted = 100000;
     private Light _light;
 
+    public bool CausticsOnly = true;
+
     public GameObject PhotonMap;
     private PhotonMap _map;
 
@@ -169,7 +171,7 @@ public class PhotonEmitter : MonoBehaviour
                 // Absorption
                 else
                 {
-                    if (isCaustic)
+                    if (isCaustic || !CausticsOnly)
                     {
                         _map.AddPhoton(photon);
                     }

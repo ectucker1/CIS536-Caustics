@@ -16,14 +16,18 @@ public class PhotonMap : MonoBehaviour
 
     public bool TreeBuilt { get; private set; } = false;
 
+    public bool UseFilter = true;
     public float FilterConstant = 1.0f;
+    public int NumSamples = 100;
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.white;
 
+        // While we are building
         if (_tree == null)
         {
+            // Visualize some of the photons
             int drawn = 0;
             foreach (Photon p in _photons)
             {
@@ -32,20 +36,6 @@ public class PhotonMap : MonoBehaviour
                 if (drawn > 500)
                     break;
             }
-        }
-        else
-        {
-            // Visualize KD-tree query
-            List<int> results = new List<int>();
-            _query.KNearest(_tree, Vector3.zero, 100, results);
-            foreach (int index in results)
-            {
-                Gizmos.DrawSphere(_mapping[index].Position, 0.01f);
-            }
-
-            // Visualize radiance estimate
-            Gizmos.color = EstimateRadiance(Vector3.zero, Vector3.up);
-            Gizmos.DrawSphere(Vector3.zero, 0.05f);
         }
     }
 
@@ -58,7 +48,7 @@ public class PhotonMap : MonoBehaviour
     {
         // Find the nearest 100 photons
         List<int> nearest = new List<int>();
-        _query.KNearest(_tree, point, 100, nearest);
+        _query.KNearest(_tree, point, NumSamples, nearest);
 
         // Find furthest photon in radius
         float maxRadius = 0;
@@ -81,13 +71,16 @@ public class PhotonMap : MonoBehaviour
             // Cone filter weight
             // See "A Practical Guide to Global Illumination using Photon Maps"
             var weight = 1.0f - dist / (FilterConstant * maxRadius);
+            if (!UseFilter)
+                weight = 1.0f;
             totalPower += p.Power * weight * Mathf.Abs(Vector3.Dot(p.IncidentDirection, normal));
         }
 
         // Divide by sphere area
         totalPower /= (Mathf.PI * maxRadius * maxRadius);
         // Divide by filter distribution
-        totalPower /= 1.0f - 2.0f / (3.0f * FilterConstant);
+        if (UseFilter)
+            totalPower /= 1.0f - 2.0f / (3.0f * FilterConstant);
 
         return totalPower * 100.0f;
     }

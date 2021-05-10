@@ -230,6 +230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &38230073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -278,6 +279,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &544229613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -400,6 +402,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &897552231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -596,6 +599,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &911587257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -652,6 +656,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 372af6805133cbb44ac74e50a667bc7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UseFilter: 0
+  FilterConstant: 1
+  NumSamples: 100
 --- !u!1 &1441781691
 GameObject:
   m_ObjectHideFlags: 0
@@ -811,6 +818,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &1861555465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -933,6 +941,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &1880684035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1125,7 +1134,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb46737ea42c03a4d9e1ebfb2bd2e842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxEmitted: 50000
+  MaxEmitted: 5000
+  CausticsOnly: 0
   PhotonMap: {fileID: 976306726}
 --- !u!1 &2079690718
 GameObject:
@@ -1162,6 +1172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 976306726}
   TextureSize: 256
+  RadianceAmount: 0.3
 --- !u!114 &2079690720
 MonoBehaviour:
   m_ObjectHideFlags: 0

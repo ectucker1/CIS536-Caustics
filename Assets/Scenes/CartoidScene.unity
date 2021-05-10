@@ -212,7 +212,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &165975414
 MonoBehaviour:
@@ -227,6 +227,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxEmitted: 100000
+  CausticsOnly: 1
   PhotonMap: {fileID: 1753891151}
 --- !u!1 &296366174
 GameObject:
@@ -387,6 +388,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhotonMap: {fileID: 1753891151}
   TextureSize: 1024
+  RadianceAmount: 2
 --- !u!65 &871151703
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -459,7 +461,7 @@ Transform:
   m_LocalScale: {x: 3.0256999, y: 0.1, z: 3.0384002}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &871151707
 MonoBehaviour:
@@ -468,6 +470,40 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 871151701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26ed516582fb49b4380eabcce824db11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  extrude: {x: 1, y: 1}
+--- !u!1 &1388684500 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: 17aa2c7db4fe90a45a1450340479869a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1560935619}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1388684505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1388684500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23c276ba7f5fc0f45a1c0728a10e2db3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PhotonMap: {fileID: 1753891151}
+  TextureSize: 1024
+  RadianceAmount: 2
+--- !u!114 &1388684506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1388684500}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26ed516582fb49b4380eabcce824db11, type: 3}
@@ -484,7 +520,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 17aa2c7db4fe90a45a1450340479869a,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 17aa2c7db4fe90a45a1450340479869a,
         type: 3}
@@ -577,7 +613,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 372af6805133cbb44ac74e50a667bc7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UseFilter: 1
   FilterConstant: 1
+  NumSamples: 100
 --- !u!4 &1753891153
 Transform:
   m_ObjectHideFlags: 0
@@ -590,5 +628,5 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

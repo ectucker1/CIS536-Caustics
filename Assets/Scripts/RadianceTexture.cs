@@ -14,6 +14,9 @@ public class RadianceTexture : MonoBehaviour
     private int _currentU = 0;
     private Texture2D _texture;
 
+    public float RadianceAmount = 1.0f;
+    private float _appliedRadiance = 1.0f;
+
     void Start()
     {
         _UVWorld = GetComponent<AbstractUVWorld>();
@@ -42,6 +45,8 @@ public class RadianceTexture : MonoBehaviour
                 var renderer = GetComponent<Renderer>();
                 Material blended = new Material(Shader.Find("Custom/BlendingShader"));
                 blended.SetTexture("_PhotonMap", _texture);
+                blended.SetFloat("_RadianceAmount", RadianceAmount);
+                _appliedRadiance = RadianceAmount;
                 blended.color = renderer.material.color;
                 renderer.material = blended;
             }
@@ -70,6 +75,18 @@ public class RadianceTexture : MonoBehaviour
 
             // Apply changes to texture
             _texture.Apply();
+        }
+
+        // Apply changes in radiance amount
+        if (_appliedRadiance != RadianceAmount)
+        {
+            var renderer = GetComponent<Renderer>();
+            var material = renderer.material;
+            if (material.HasProperty("_RadianceAmount"))
+            {
+                material.SetFloat("_RadianceAmount", RadianceAmount);
+                _appliedRadiance = RadianceAmount;
+            }
         }
     }
 }
