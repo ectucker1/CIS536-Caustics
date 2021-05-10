@@ -48,6 +48,9 @@ public class RadianceTexture : MonoBehaviour
                 blended.SetFloat("_RadianceAmount", RadianceAmount);
                 _appliedRadiance = RadianceAmount;
                 blended.color = renderer.material.color;
+                blended.SetFloat("_Specular", renderer.material.GetFloat("_Specular"));
+                blended.SetFloat("_Glossiness", renderer.material.GetFloat("_Smoothness"));
+                blended.SetFloat("_Diffuse", renderer.material.GetFloat("_Diffuse"));
                 renderer.material = blended;
             }
 

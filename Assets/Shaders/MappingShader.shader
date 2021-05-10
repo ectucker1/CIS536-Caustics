@@ -31,6 +31,7 @@
 
         half _Smoothness;
         half _Specular;
+        half _Diffuse;
         fixed4 _Color;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
@@ -42,7 +43,7 @@
 
         void surf (Input IN, inout SurfaceOutputStandardSpecular o)
         {
-            o.Albedo = _Color.rgb;
+            o.Albedo = _Color.rgb * _Diffuse;
             o.Specular = _Specular;
             o.Smoothness = _Smoothness;
             o.Alpha = _Color.a;
