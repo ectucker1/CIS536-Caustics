@@ -3,28 +3,39 @@ using System.Collections.Generic;
 using UnityEngine;
 using UVWorld;
 
+// Script applied to generate a radiance filter
 public class RadianceTexture : MonoBehaviour
 {
+    // Photon map to query from
     public GameObject PhotonMap;
+    // The size of the texture to generate
     public int TextureSize = 256;
 
+    // Reference to UV world component
     private AbstractUVWorld _UVWorld;
+    // Reference to photon map components
     private PhotonMap _map;
 
+    // The current U coordinate to work on
     private int _currentU = 0;
+    // The texture being generated
     private Texture2D _texture;
 
+    // Scaling value for radiance
     public float RadianceAmount = 1.0f;
     private float _appliedRadiance = 1.0f;
 
+    // Get components on start
     void Start()
     {
         _UVWorld = GetComponent<AbstractUVWorld>();
         _map = PhotonMap.GetComponent<PhotonMap>();
     }
 
+    // Work on texture each update
     void Update()
     {
+        // If everything is ready to build texture
         if (_map.TreeBuilt && _currentU < TextureSize)
         {
             // If this is our first frame

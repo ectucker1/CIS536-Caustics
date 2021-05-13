@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace UnityTemplateProjects
 {
+    // Basic camera controller script provided by Unity
     public class SimpleCameraController : MonoBehaviour
     {
         class CameraState

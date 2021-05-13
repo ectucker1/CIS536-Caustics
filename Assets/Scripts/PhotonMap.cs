@@ -6,18 +6,25 @@ using UnityEngine;
 // Actual storage for the photons
 public class PhotonMap : MonoBehaviour
 {
+    // List of photons
     private List<Photon> _photons = new List<Photon>();
 
+    // KDTree and query object
     private KDTree _tree;
     private KDQuery _query;
 
     // Parallel array with the one in the KDTree
     private Photon[] _mapping;
 
+    // True once the tree has been build
     public bool TreeBuilt { get; private set; } = false;
 
+    // Whether or not to use the cone filter
     public bool UseFilter = true;
+    // Cone filter constant
     public float FilterConstant = 1.0f;
+
+    // The number of photons to sample in radiance
     public int NumSamples = 100;
 
     private void OnDrawGizmos()
@@ -38,15 +45,17 @@ public class PhotonMap : MonoBehaviour
             }
         }
     }
-
+    
+    // Adds a photon into the map
     public void AddPhoton(Photon photon)
     {
         _photons.Add(photon);
     }
 
+    // Calculates radiance at a given point
     public Color EstimateRadiance(Vector3 point, Vector3 normal)
     {
-        // Find the nearest 100 photons
+        // Find the nearest K photons
         List<int> nearest = new List<int>();
         _query.KNearest(_tree, point, NumSamples, nearest);
 
@@ -71,8 +80,11 @@ public class PhotonMap : MonoBehaviour
             // Cone filter weight
             // See "A Practical Guide to Global Illumination using Photon Maps"
             var weight = 1.0f - dist / (FilterConstant * maxRadius);
+
+            // If not using filter, set weight to 1
             if (!UseFilter)
                 weight = 1.0f;
+
             totalPower += p.Power * weight * Mathf.Abs(Vector3.Dot(p.IncidentDirection, normal));
         }
 
@@ -82,6 +94,7 @@ public class PhotonMap : MonoBehaviour
         if (UseFilter)
             totalPower /= 1.0f - 2.0f / (3.0f * FilterConstant);
 
+        // Scale up power somewhat
         return totalPower * 100.0f;
     }
 

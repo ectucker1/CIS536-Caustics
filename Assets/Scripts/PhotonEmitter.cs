@@ -5,23 +5,29 @@ using UnityEngine;
 // Script to attach to lights so they emit photons
 public class PhotonEmitter : MonoBehaviour
 {
+    // The maxiumum number of lights emitted
     public int MaxEmitted = 100000;
+    // Reference to the light component
     private Light _light;
 
+    // Whether or not to filter to only caustic photons
     public bool CausticsOnly = true;
 
+    // Reference to the photon map to store photons in
     public GameObject PhotonMap;
     private PhotonMap _map;
 
+    // The number of photons emitted so far
     private int _numEmitted = 0;
 
-    // Start is called before the first frame update
+    // Get components on start
     void Start()
     {
         _light = GetComponent<Light>();
         _map = PhotonMap.GetComponent<PhotonMap>();
     }
 
+    // Display number of photons left to emit on GUI
     void OnGUI()
     {
         if (_numEmitted < MaxEmitted)
@@ -33,8 +39,10 @@ public class PhotonEmitter : MonoBehaviour
     // Emit more photons each frame
     void Update()
     {
+        // If everything is initialized right, and we haven't emitted enough photons
         if (_map != null && _light != null && _numEmitted < MaxEmitted)
         {
+            // Emit 100 photons
             for (int i = 0; i < 100; i++)
             {
                 // Create initial photon state
@@ -43,10 +51,12 @@ public class PhotonEmitter : MonoBehaviour
                 photon.IncidentDirection = GetPhotonDirection();
                 photon.Power = _light.intensity * _light.color / MaxEmitted;
 
+                // Actually shoot the photon
                 EmitPhoton(photon);
                 _numEmitted++;
             }
         }
+        // If the map hasn't been built yet, tell it to do so
         else if (!_map.TreeBuilt)
         {
             _map.BuildTree();
@@ -63,27 +73,35 @@ public class PhotonEmitter : MonoBehaviour
         // Check ray against scene
         Ray ray = new Ray(photon.Position, photon.IncidentDirection);
 
+        // Information about the hit
         RaycastHit hit;
         RaycastHit? maybe = null;
         bool hasCollision = false;
 
+        // The distance traveled and normal at the hit point
         float distance = 0.0f;
         Vector3 normal = Vector3.zero;
 
+        // If we are not emitting in reverse
         if (!reverse)
         {
+            // Send a normal raycast
             hasCollision = Physics.Raycast(ray.origin, ray.direction, out hit);
             maybe = hit;
             distance = hit.distance;
             normal = hit.normal;
         }
+        // If we are emitting in reverse (e.g. from within transparent object)
         else if (reverse)
         {
+            // Reverse the ray
             ray.origin = ray.GetPoint(100.0f);
             ray.direction = -ray.direction;
 
+            // Get all hit points
             RaycastHit[] results = Physics.RaycastAll(ray);
             RaycastHit? min = null;
+            // Iterate to find the actual closest hit point
             float minDist = 0.0f;
             foreach (RaycastHit result in results)
             {
@@ -94,6 +112,7 @@ public class PhotonEmitter : MonoBehaviour
                 }
             }
 
+            // If there was a reverse hit, store it's information
             if (min != null)
             {
                 hasCollision = true;
@@ -104,14 +123,18 @@ public class PhotonEmitter : MonoBehaviour
             }
         }
 
+        // If the photon hit something
         if (hasCollision)
         {
             hit = (RaycastHit)maybe;
 
+            // Draw the path for debugging
             Debug.DrawRay(photon.Position, photon.IncidentDirection * distance, Color.green);
 
+            // Update position to the hit position
             photon.Position = hit.point;
 
+            // Get the material information
             var renderer = hit.collider.GetComponentInParent<MeshRenderer>();
             var material = renderer.material;
 
@@ -127,25 +150,32 @@ public class PhotonEmitter : MonoBehaviour
             float choice1 = Random.Range(0.0f, 1.0f);
             float choice2 = Random.Range(0.0f, 1.0f);
 
-            // TODO Validate correct handling of transmission
             // Refraction
             if (choice1 < probTransmission)
             {
+                // Transmission -> caustic
                 isCaustic = true;
+
                 // Inset position into the surface somewhat
                 photon.Position -= hit.normal * 0.01f;
+
+                // Refract direction
                 // See https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics/refraction for math
                 float ior = GetRefractiveIndex(material);
-                float etai_over_etat = lastIOR / ior;
+                float n1_over_n2 = lastIOR / ior;
                 // Assume we're leaving surface if ior is equal to the last
                 if (reverse) {
-                    etai_over_etat = ior / lastIOR;
+                    n1_over_n2 = ior / lastIOR;
                 }
                 float cos_theta = Mathf.Min(Vector3.Dot(-photon.IncidentDirection, normal), 1.0f);
-                Vector3 r_out_perp = etai_over_etat * (photon.IncidentDirection + cos_theta * normal);
+                Vector3 r_out_perp = n1_over_n2 * (photon.IncidentDirection + cos_theta * normal);
                 Vector3 r_out_parallel = -Mathf.Sqrt(Mathf.Abs(1.0f - r_out_perp.sqrMagnitude)) * normal;
                 photon.IncidentDirection = r_out_perp + r_out_parallel;
+
+                // Update photon power
                 photon.Power = (photon.Power * materialColor);
+
+                // Emit new photon
                 EmitPhoton(photon, bounces - 1, ior, !reverse, isCaustic: isCaustic);
             }
             // Reflection or absorbtion
@@ -171,6 +201,7 @@ public class PhotonEmitter : MonoBehaviour
                 // Absorption
                 else
                 {
+                    // Store only if caustic or not filtering
                     if (isCaustic || !CausticsOnly)
                     {
                         _map.AddPhoton(photon);
@@ -180,6 +211,7 @@ public class PhotonEmitter : MonoBehaviour
         }
         else
         {
+            // Red ray for miss
             Debug.DrawRay(photon.Position, photon.IncidentDirection, Color.red);
         }
     }
